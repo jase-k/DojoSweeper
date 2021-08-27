@@ -60,7 +60,7 @@ function render(gameBoard) {
   for(var i=0; i<gameBoard.length; i++) {
     result += '<div class="row">'
     for(var j=0; j<gameBoard[i].length; j++) {
-      result += `<button class="tatami" oncontextmenu="addFlag(this)" onclick="search(${i}, ${j}, this, randomDojo)"></button>`;
+      result += `<button class="tatami" oncontextmenu="addFlag(this)" onclick="search(${i}, ${j}, this)"></button>`;
     }
     result += '</div>'
   }
@@ -136,22 +136,16 @@ function findNinjas(){
 }    
 
 //checks for ninja's nearby. Counts the number of ninjas and changs the inner HTML to number of nearby. IF click a ninja, end game and show restart button. //add class of 'found'
-function search(i, j, element, table) {
+function search(i, j, element) {
   console.log({i, j});
-  var number = 0; 
 
-  for(var a = i-1; a <= i+1 && a < table.length; a++){
-    if(a >= 0){
-      for(var b = j-1; b <= j+1 && b < table.length; b++){
-        if(!(a == i && b == j) && b >= 0){
-          console.log(table[a][b])
-          number += table[a][b]
-        }
-      }
-    }
+  var number = getSurrounding(i, j);
+
+  if(number == 0){ //find surroundings
+    expandFound(i,j)
   }
 
-  if(table[i][j] == 1){
+  if(randomDojo[i][j] == 1){
     element.innerHTML = '<img src="./images/ninja.png" alt="ninja" class="ninja">'
     console.log("You hit a Ninja")
     gameStatus = 'lost';
@@ -232,3 +226,65 @@ function displayGridOptions(){
   }
 }
 displayGridOptions();
+
+//When click on a 0 expand the surrounding buttons and mark as found"
+function expandFound(i, j){
+  var indexes = [];
+  var gameButtons = document.querySelectorAll('.tatami')
+  
+  // Builds array of indexes used to select elements from grid
+  for(var a = i-1; a <= i+1 && a < rows; a++){
+    if(a >= 0){
+      for(var b = j-1; b <= j+1 && b < columns; b++){
+        if(!(a == i && b == j) && b >= 0){
+          console.log(randomDojo[a][b])
+          indexes.push(a*randomDojo[b].length + b)
+        }
+      }
+    }
+  }
+  console.log("Indexes around a zero: " + indexes)
+  
+  // iterates through the array and adds the new class and innerhtml. If not found, starts the expandFound function again. 
+  for(var i = 0; i < indexes.length; i++){
+    findTile(indexes[i])
+  }
+}
+
+//finds a tile reveals number
+function findTile(index){
+  var gameButtons = document.querySelectorAll('.tatami')
+
+  if(!gameButtons[index].classList.contains("found")){ 
+    var box = gameButtons[index]
+    box.classList.add("found")
+
+    var num = getSurrounding(Math.floor(index/rows), index%columns);
+    box.innerHTML = num;
+    
+    //if num == 0 perform find surroundings again from that index
+    if(num == 0){
+      expandFound(Math.floor(index/rows), index%columns)
+    }
+
+    document.querySelector('.score').innerHTML++
+    checkWin() 
+  }
+}
+
+// calculates the surrounding button sum of ninjas 
+function getSurrounding(i, j){
+    var number = 0; 
+
+    for(var a = i-1; a <= i+1 && a < rows; a++){
+      if(a >= 0){
+        for(var b = j-1; b <= j+1 && b < columns; b++){
+          if(!(a == i && b == j) && b >= 0){
+            console.log(randomDojo[a][b])
+            number += randomDojo[a][b]
+          }
+        }
+      }
+    }
+    return number
+}
