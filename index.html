@@ -7,8 +7,21 @@
     <link rel="stylesheet" href="game.css">
 </head>
 <body>
-    <h2>Dojo Sweeper<h2>
-    <div id="the-dojo">still loading... there may be an error</div>
+    <h2>Dojo Sweeper</h2>
+    <div id="startOptions">
+        <h4>Choose Your difficulty</h4>
+        <div id="options">
+            <select name="difficulty" id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="Novice">Novice</option>
+                <option value="Hard">Hard</option>
+            </select>
+            <button onclick="startGame()" id="start">Start!</button>
+
+        </div>
+    </div>
+    <h4 class="hide">Timer: <span id="time">0:00</span></h4>
+    <div id="the-dojo">Select Options and Hit Start to Play!</div>
     <h2 class="scorboard">Score: <span class="score">0</span></h2>
     <script src="game.js"></script>
 </body>

@@ -10,6 +10,25 @@ h2 {
     text-align: center;
     margin: 20px 0;
 }
+
+h4 {
+    text-align: center;
+    font: 0.8em;
+    margin: 5px 0;
+    width: 100%;
+}
+
+#startOptions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.hide{
+    display: none;
+}
+
     
 #the-dojo {
     width: 320px;

@@ -33,8 +33,7 @@ function createGrid(num){ //add num variable to recreate difficulty.
   }
 }
 
-//runs the function to add the ninjas in the grid.
-createGrid(numOfNinjas);
+
 
 function changeGrid(){
   var x = createNinja();
@@ -158,20 +157,40 @@ function search(i, j, element, table) {
   }
 }
 
-    
-// BONUS CHALLENGES
-// 1. draw the number onto the button instead of alerting it
-// 2. at the start randomly place 10 ninjas into theDojo with at most 1 on each spot
-// 3. if you click on a ninja you must restart the game 
-   
-    
 // start the game
 // message to greet a user of the game
 var style="color:cyan;font-size:1.5rem;font-weight:bold;";
 console.log("%c" + "IF YOU ARE A DOJO STUDENT...", style);
 console.log("%c" + "GOOD LUCK THIS IS A CHALLENGE!", style);
-// shows the dojo for debugging purposes
-console.table(randomDojo);
-// adds the rows of buttons into <div id="the-dojo"></div> 
-dojoDiv.innerHTML = render(randomDojo);    
 
+
+//Starts Game: 
+function startGame(){
+  var difficulty = document.querySelector('#difficulty').value 
+  console.log("Difficulty Level Chosen: " +difficulty)
+  //Change Columns and rows based on user input
+
+  //Renders Game Board based on Options Selected by User
+  //Create Array of 0's based on the Columns and Rows
+  
+  //Change amount of squares to ninjas based on difficulty
+  if(difficulty == 'easy'){
+    numOfNinjas = Math.round((rows * columns)*.10)
+  }
+  else if(difficulty == 'Novice'){
+    numOfNinjas = Math.round((rows * columns)*.20)
+  }
+  else{
+    numOfNinjas = Math.round((rows * columns)*.30)
+  }
+  //runs the function to add the ninjas in the grid.
+  createGrid(numOfNinjas);
+  // adds the rows of buttons into <div id="the-dojo"></div> 
+  dojoDiv.innerHTML = render(randomDojo);  
+  
+  //Removes Start Options from HTML
+  document.querySelector('#startOptions').remove() 
+  
+  // shows the dojo for debugging purposes
+  console.table(randomDojo);
+}
