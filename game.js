@@ -105,7 +105,7 @@ function removeButtonFunctions(){
   var buttons = document.querySelectorAll('.tatami')
 
   indexes.forEach(idx => {
-    buttons[idx].innerHTML = '<img src="/images/ninja.png" alt="ninja" class="ninja">'
+    buttons[idx].innerHTML = '<img src="./images/ninja.png" alt="ninja" class="ninja">'
   })
 }
 
@@ -141,7 +141,7 @@ function search(i, j, element, table) {
   }
 
   if(table[i][j] == 1){
-    element.innerHTML = '<img src="/images/ninja.png" alt="ninja" class="ninja">'
+    element.innerHTML = '<img src="./images/ninja.png" alt="ninja" class="ninja">'
     console.log("You hit a Ninja")
     gameStatus = 'lost';
 
