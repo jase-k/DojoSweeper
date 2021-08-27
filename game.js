@@ -7,23 +7,23 @@
 var dojoDiv = document.querySelector("#the-dojo");
 var gameStatus = 'active' //can be 'active' 'lost' or 'won'
 var numOfNinjas = 10;
-var rows = 10;
-var columns = 10;
+var rows = 18;
+var columns = 18;
 
 //Random Dojo Array: Start with a random number
-var randomDojo =[
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-]
+var randomDojo = []
 
+
+function emptyGrid(x, y){
+  var array = []
+  for(var i = 0; i < x; i++){
+    array.push([])
+    for(var j = 0; j < y; j++){
+      array[i].push(0)
+    }
+  }
+  return array
+}
 
 //run ChangeGrid 10x to place ninjas
 function createGrid(num){ //add num variable to recreate difficulty. 
@@ -36,36 +36,40 @@ function createGrid(num){ //add num variable to recreate difficulty.
 
 
 function changeGrid(){
-  var x = createNinja();
-  var y = createNinja();
+  var spot = createNinja();
   
-  if(randomDojo[x][y] == 0){
-    randomDojo[x][y] = 1;
+  if(randomDojo[spot.y][spot.x] == 0){
+    randomDojo[spot.y][spot.x] = 1;
   }else{
     changeGrid()
   }
-  console.log(`coordinates of ninja: ${x}, ${y}`)
+  console.log(`coordinates of ninja: ${spot}`)
 }
 
 function createNinja(){
-  var x = Math.floor(Math.random() * 10)
-  return x; 
+  var spot = {}
+  spot.x = Math.floor(Math.random() * columns)
+  spot.y = Math.floor(Math.random() * rows)
+
+  return spot; 
 }
     
 // Creates the rows of buttons for this game
-function render(theDojo) {
+function render(gameBoard) {
   var result = "";
-  for(var i=0; i<theDojo.length; i++) {
-    for(var j=0; j<theDojo[i].length; j++) {
-      result += `<button class="tatami" onclick="search(${i}, ${j}, this, randomDojo)"></button>`;
+  for(var i=0; i<gameBoard.length; i++) {
+    result += '<div class="row">'
+    for(var j=0; j<gameBoard[i].length; j++) {
+      result += `<button class="tatami" oncontextmenu="addFlag(this)" onclick="search(${i}, ${j}, this, randomDojo)"></button>`;
     }
+    result += '</div>'
   }
   return result;
 }
     
 // TODO - Make this function tell us how many ninjas are hiding 
 //        under the adjacent (all sides and corners) squares.
-//        Use i and j as the indexes to check theDojo.
+//        Use i and j as the indexes to check gameBoard.
 function checkWin(){
   if(gameStatus == 'lost'){
     removeButtonFunctions()
@@ -88,6 +92,14 @@ function checkWin(){
     
   }
 }
+
+function removeContextMenu(divs){
+  divs.forEach(div => {
+    div.addEventListener("contextmenu", ( e )=> { e.preventDefault(); return false; } )
+  })
+  console.log("div elements: ", divs)
+}
+
 
 
 //removes all Click events from the game board buttons
@@ -157,6 +169,9 @@ function search(i, j, element, table) {
   }
 }
 
+function addFlag(element){
+  element.innerHTML = '<img src="./images/flag.png" alt="flag" class="ninja">'
+}
 // start the game
 // message to greet a user of the game
 var style="color:cyan;font-size:1.5rem;font-weight:bold;";
@@ -169,9 +184,13 @@ function startGame(){
   var difficulty = document.querySelector('#difficulty').value 
   console.log("Difficulty Level Chosen: " +difficulty)
   //Change Columns and rows based on user input
+  rows = document.querySelector('#rows').value
+  columns = document.querySelector('#columns').value
 
   //Renders Game Board based on Options Selected by User
   //Create Array of 0's based on the Columns and Rows
+  randomDojo = emptyGrid(rows, columns)
+
   
   //Change amount of squares to ninjas based on difficulty
   if(difficulty == 'easy'){
@@ -183,10 +202,15 @@ function startGame(){
   else{
     numOfNinjas = Math.round((rows * columns)*.30)
   }
+  
   //runs the function to add the ninjas in the grid.
   createGrid(numOfNinjas);
+
   // adds the rows of buttons into <div id="the-dojo"></div> 
   dojoDiv.innerHTML = render(randomDojo);  
+  
+  //Removes the context menu from right clicks
+  removeContextMenu(document.querySelectorAll('.tatami'))
   
   //Removes Start Options from HTML
   document.querySelector('#startOptions').remove() 
@@ -194,3 +218,17 @@ function startGame(){
   // shows the dojo for debugging purposes
   console.table(randomDojo);
 }
+
+function displayGridOptions(){
+  var rows = document.querySelector('#rows')
+  var columns = document.querySelector('#columns')
+  
+  for(var i= 10; i < 31; i++){
+    rows.innerHTML += `<option value="${i}">${i}</option>`
+  }
+
+  for(var i= 10; i < 31; i++){
+    columns.innerHTML += `<option value=${i}>${i}</option>`
+  }
+}
+displayGridOptions();

@@ -31,10 +31,15 @@ h4 {
 
     
 #the-dojo {
-    width: 320px;
     margin: 0 auto;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+}
+
+.row{
+    display: flex;
+    flex-wrap: nowrap;
 }
     
 .tatami {
@@ -46,11 +51,11 @@ h4 {
     border-bottom: 2px solid #999;
 }
     
-.tatami:active {
+/* .tatami:active {
     border: 2px solid #999;
     border-right: 2px solid #ccc;
     border-bottom: 2px solid #ccc;
-}
+} */
 
 .ninja {
     height: 30px;
