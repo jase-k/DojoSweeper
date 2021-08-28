@@ -7,8 +7,9 @@
 var dojoDiv = document.querySelector("#the-dojo");
 var gameStatus = 'active' //can be 'active' 'lost' or 'won'
 var numOfNinjas = 10;
-var rows = 18;
-var columns = 18;
+var rows = 10;
+var columns = 10;
+var difficulty = 'easy'
 
 //Random Dojo Array: Start with a random number
 var randomDojo = []
@@ -141,7 +142,7 @@ function search(i, j, element) {
 
   var number = getSurrounding(i, j);
 
-  if(number == 0){ //find surroundings
+  if(number == 0 && randomDojo[i][j] == 0){ //find surroundings if 0 and not a ninja
     expandFound(i,j)
   }
 
@@ -151,41 +152,49 @@ function search(i, j, element) {
     gameStatus = 'lost';
 
     var newDiv = document.createElement("DIV")
-    dojoDiv.appendChild(newDiv).innerHTML = `<h2>You Lose!</h2><button onclick="location.reload()">restart</button>`;
+    dojoDiv.appendChild(newDiv).innerHTML = `<h2>You Lose!</h2><button onclick="location.reload()">Start Over</button> <button onclick="startGame()"> Retry </button>`;
   }else{
-    element.innerHTML = number
+    element.innerHTML = number 
   }
-// add '.found' class to clicked element to indicate which elements have been found. If found for the first time, add 1 to Score 
+  // add '.found' class to clicked element to indicate which elements have been found. If found for the first time, add 1 to Score 
   if(!element.classList.contains("found")){ 
     element.classList.add("found")
-    document.querySelector('.score').innerHTML++
-    checkWin() 
+    if(randomDojo[i][j] == 0){
+      document.querySelector('.score').innerHTML++
+    }
   }
+
+  checkWin() 
 }
 
 function addFlag(element){
   element.innerHTML = '<img src="./images/flag.png" alt="flag" class="ninja">'
 }
-// start the game
-// message to greet a user of the game
-var style="color:cyan;font-size:1.5rem;font-weight:bold;";
-console.log("%c" + "IF YOU ARE A DOJO STUDENT...", style);
-console.log("%c" + "GOOD LUCK THIS IS A CHALLENGE!", style);
 
+function setColumns(element){
+  columns = element.value
+  console.log("Chosen Columns: "+ columns)
+}
+
+function setRows(element){
+  rows = element.value
+  console.log("Chosen Rows: "+ rows)
+}
+
+function setDifficulty(element){
+  difficulty = element.value
+  console.log("Chosen Difficulty: "+ difficulty)
+}
 
 //Starts Game: 
 function startGame(){
-  var difficulty = document.querySelector('#difficulty').value 
-  console.log("Difficulty Level Chosen: " +difficulty)
-  //Change Columns and rows based on user input
-  rows = document.querySelector('#rows').value
-  columns = document.querySelector('#columns').value
-
   //Renders Game Board based on Options Selected by User
   //Create Array of 0's based on the Columns and Rows
   randomDojo = emptyGrid(rows, columns)
 
-  
+  //set GameStatus to 'active':
+  gameStatus = 'active'
+
   //Change amount of squares to ninjas based on difficulty
   if(difficulty == 'easy'){
     numOfNinjas = Math.round((rows * columns)*.10)
@@ -207,7 +216,13 @@ function startGame(){
   removeContextMenu(document.querySelectorAll('.tatami'))
   
   //Removes Start Options from HTML
-  document.querySelector('#startOptions').remove() 
+  var startOptions = document.querySelector('#startOptions')
+  if(startOptions){
+    startOptions.remove()
+  } 
+  //resets score to zero: 
+
+  document.querySelector('.score').innerHTML = 0;
   
   // shows the dojo for debugging purposes
   console.table(randomDojo);

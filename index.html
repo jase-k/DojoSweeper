@@ -11,13 +11,13 @@
     <div id="startOptions">
         <h4>Choose Your difficulty</h4>
         <div id="options">
-            <label for="columns">Columns:</label>
+            <label for="columns" onchange="setColumns(this)">Columns:</label>
             <select name="columns" id="columns">
             </select>
             <label for="rows">Rows:</label>
-            <select name="rows" id="rows">
+            <select name="rows" id="rows" onchange="setRows(this)">
             </select>
-            <select name="difficulty" id="difficulty">
+            <select name="difficulty" id="difficulty" onchange="setDifficulty(this)">
                 <option value="easy">Easy</option>
                 <option value="Novice">Novice</option>
                 <option value="Hard">Hard</option>
