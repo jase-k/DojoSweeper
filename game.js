@@ -10,9 +10,10 @@ var numOfNinjas = 10;
 var rows = 10;
 var columns = 10;
 var difficulty = 'easy'
+var score = 0
 
 //Random Dojo Array: Start with a random number
-var randomDojo = []
+var gameGrid = []
 
 
 function emptyGrid(x, y){
@@ -26,25 +27,34 @@ function emptyGrid(x, y){
   return array
 }
 
-//run ChangeGrid 10x to place ninjas
-function createGrid(num){ //add num variable to recreate difficulty. 
+//run ChangeGrid based on the Number of Ninjas
+function createGrid(num, badIndexes){ //add num variable to recreate difficulty. 
   console.log("Number of Ninjas on the Map: "+ num)
   for(var i = 0; i<num; i++){
-     changeGrid();
+     changeGrid(badIndexes);
   }
 }
 
 
-
-function changeGrid(){
+//Add if spot is one of the bad indexes, change grid again
+function changeGrid(badIndexes){
   var spot = createNinja();
+  var matchedIndex = false; 
+
+  //checks to see if any badIndexes match the spot
+  badIndexes.forEach(idx =>{
+    if(idx.i == spot.y && idx.j == spot.x){
+      matchedIndex = true
+    }
+  })
   
-  if(randomDojo[spot.y][spot.x] == 0){
-    randomDojo[spot.y][spot.x] = 1;
-  }else{
-    changeGrid()
+  if(gameGrid[spot.y][spot.x] == 0 && !matchedIndex){
+    gameGrid[spot.y][spot.x] = 1;
   }
-  console.log(`coordinates of ninja: ${spot}`)
+  else{
+    changeGrid(badIndexes)
+  }
+  console.log(`coordinates of ninja: ${spot.y} ${spot.x}`)
 }
 
 function createNinja(){
@@ -124,10 +134,10 @@ function removeButtonFunctions(){
 
 function findNinjas(){
   var indexes = [];
-  // Create an array of locations of the ninjas from randomDojo
-  for(var i = 0; i < randomDojo.length; i++){
-    for(var j = 0; j < randomDojo[i].length; j++){
-      if(randomDojo[i][j] == 1){
+  // Create an array of locations of the ninjas from gameGrid
+  for(var i = 0; i < gameGrid.length; i++){
+    for(var j = 0; j < gameGrid[i].length; j++){
+      if(gameGrid[i][j] == 1){
         indexes.push(i*columns + j)
       }
     }
@@ -140,13 +150,17 @@ function findNinjas(){
 function search(i, j, element) {
   console.log({i, j});
 
-  var number = getSurrounding(i, j);
+  if(score == 0){ 
+    populateNinjas(i , j); //Adds Ninjas to the New Grid
+  }
 
-  if(number == 0 && randomDojo[i][j] == 0){ //find surroundings if 0 and not a ninja
+  var number = getSurroundingSum(i, j);
+
+  if(number == 0 && gameGrid[i][j] == 0){ //find surroundings if 0 and not a ninja
     expandFound(i,j)
   }
 
-  if(randomDojo[i][j] == 1){
+  if(gameGrid[i][j] == 1){
     element.innerHTML = '<img src="./images/ninja.png" alt="ninja" class="ninja">'
     console.log("You hit a Ninja")
     gameStatus = 'lost';
@@ -159,8 +173,9 @@ function search(i, j, element) {
   // add '.found' class to clicked element to indicate which elements have been found. If found for the first time, add 1 to Score 
   if(!element.classList.contains("found")){ 
     element.classList.add("found")
-    if(randomDojo[i][j] == 0){
-      document.querySelector('.score').innerHTML++
+    if(gameGrid[i][j] == 0){//checks if selection is a ninja 
+      score++
+      document.querySelector('.score').innerHTML = score;
     }
   }
 
@@ -186,16 +201,8 @@ function setDifficulty(element){
   console.log("Chosen Difficulty: "+ difficulty)
 }
 
-//Starts Game: 
-function startGame(){
-  //Renders Game Board based on Options Selected by User
-  //Create Array of 0's based on the Columns and Rows
-  randomDojo = emptyGrid(rows, columns)
-
-  //set GameStatus to 'active':
-  gameStatus = 'active'
-
-  //Change amount of squares to ninjas based on difficulty
+function populateNinjas(i, j){
+ //Change amount of squares to ninjas based on difficulty
   if(difficulty == 'easy'){
     numOfNinjas = Math.round((rows * columns)*.10)
   }
@@ -205,12 +212,25 @@ function startGame(){
   else{
     numOfNinjas = Math.round((rows * columns)*.30)
   }
-  
-  //runs the function to add the ninjas in the grid.
-  createGrid(numOfNinjas);
+
+  var badIndexes = getSurrounding(i, j)
+
+ //runs the function to add the ninjas in the grid.
+  createGrid(numOfNinjas, badIndexes);
+}
+
+//Starts Game: 
+function startGame(){
+  //Renders Game Board based on Options Selected by User
+  //Create Array of 0's based on the Columns and Rows
+  gameGrid = emptyGrid(rows, columns)
+  gameStatus = 'active'
+  //resets score to zero: 
+  score = 0 
+  document.querySelector('.score').innerHTML = score;
 
   // adds the rows of buttons into <div id="the-dojo"></div> 
-  dojoDiv.innerHTML = render(randomDojo);  
+  dojoDiv.innerHTML = render(gameGrid);  
   
   //Removes the context menu from right clicks
   removeContextMenu(document.querySelectorAll('.tatami'))
@@ -219,13 +239,7 @@ function startGame(){
   var startOptions = document.querySelector('#startOptions')
   if(startOptions){
     startOptions.remove()
-  } 
-  //resets score to zero: 
-
-  document.querySelector('.score').innerHTML = 0;
-  
-  // shows the dojo for debugging purposes
-  console.table(randomDojo);
+  }   
 }
 
 function displayGridOptions(){
@@ -252,8 +266,8 @@ function expandFound(i, j){
     if(a >= 0){
       for(var b = j-1; b <= j+1 && b < columns; b++){
         if(!(a == i && b == j) && b >= 0){
-          console.log(randomDojo[a][b])
-          indexes.push(a*randomDojo[b].length + b)
+          console.log(gameGrid[a][b])
+          indexes.push(a*gameGrid[b].length + b)
         }
       }
     }
@@ -274,7 +288,7 @@ function findTile(index){
     var box = gameButtons[index]
     box.classList.add("found")
 
-    var num = getSurrounding(Math.floor(index/rows), index%columns);
+    var num = getSurroundingSum(Math.floor(index/rows), index%columns);
     box.innerHTML = num;
     
     //if num == 0 perform find surroundings again from that index
@@ -282,7 +296,8 @@ function findTile(index){
       expandFound(Math.floor(index/rows), index%columns)
     }
 
-    document.querySelector('.score').innerHTML++
+    score++;  
+    document.querySelector('.score').innerHTML = score;
     checkWin() 
   }
 }
@@ -290,16 +305,41 @@ function findTile(index){
 // calculates the surrounding button sum of ninjas 
 function getSurrounding(i, j){
     var number = 0; 
+    var spots = []
 
     for(var a = i-1; a <= i+1 && a < rows; a++){
       if(a >= 0){
         for(var b = j-1; b <= j+1 && b < columns; b++){
           if(!(a == i && b == j) && b >= 0){
-            console.log(randomDojo[a][b])
-            number += randomDojo[a][b]
+            console.log(gameGrid[a][b])
+            number += gameGrid[a][b]
+            spots.push({
+              i : a, 
+              j : b
+            })
           }
         }
       }
     }
-    return number
+    return spots
 }
+
+function getSurroundingSum(i, j){
+  var spots = getSurrounding(i, j);
+  console.log("Sounding Tile Coordinates: " + JSON.stringify(spots))
+  var sum = 0; 
+  
+  spots.forEach(spot =>{
+    sum += gameGrid[spot.i][spot.j]
+    console.log("new sum: " + sum)
+    return sum
+  })
+  return sum
+}
+
+/////Get the first click to be a 0
+//Populate the grid with ninjas after first click
+  //based on score (if score is zero populate )
+  //save the indexes that can't have ninjas based on click
+
+
